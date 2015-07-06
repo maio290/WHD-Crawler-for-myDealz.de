@@ -27,30 +27,41 @@ SOFTWARE.
 */
 require_once("simple_html_dom.php");
 
-if($_POST)
-{
-$asin = get_asin($_POST['url']);
-$urlm = prepare_url_mobile($asin);
-$urld = prepare_url_desktop($asin);
-$data_arr = get_data($urlm);
-echo '<textarea cols="50" rows="10" >';
-echo '[url='.$urld.']';
-echo '[img]'.$data_arr[2].'[/img]';
-echo '
-';
-echo $data_arr[0];
-echo '
-';
-foreach($data_arr[1] as &$value)
-{
-$value = strip_tags($value);
-echo $value;
-echo '
-';
-};
-echo '[/url]';
-echo '</textarea>';
-}
+	if($_POST)
+	{
+	$asin = get_asin($_POST['url']);
+	$urlm = prepare_url_mobile($asin);
+	$urld = prepare_url_desktop($asin);
+	$data_arr = get_data($urlm);
+	echo '<textarea cols="50" rows="10" >';
+	echo '[url='.$urld.']';
+	echo '[img]'.$data_arr[2].'[/img]';
+	echo "\n";
+	echo $data_arr[0];
+	echo "\n";
+	echo "\n";
+	
+		if(strpos($data_arr[3],"EUR" != false))
+		{
+			echo $data_arr[3];
+			echo "\n";
+		}
+			else
+			{
+				echo 'Kein Neupreis auf Amazon.de vorhanden!';
+				echo "\n";
+				echo "\n";
+			}
+		foreach($data_arr[1] as &$value)
+		{
+			$value = strip_tags($value);
+			echo $value;
+			echo "\n";
+		};
+		
+	echo '[/url]';
+	echo '</textarea>';
+	}
 
 function prepare_url_mobile($item_id)
 {
@@ -82,6 +93,28 @@ $name = trim($name," ");
 // Common Url: http://www.amazon.de/gp/aw/d/B00OBIXRSY 
 // MerchantID: A8KICS1PHF7ZO
 
+// Fetch new price, if exists
+
+$price = substr($html, strpos($html, "Preis:") + strlen("Preis:"), 23);
+	if(strpos($price,"+") != false)
+	{
+	$price_1 = substr($html, strpos($html, "Preis:") + strlen("Preis:"), 23);
+	$price_1 = preg_replace("/[^0-9,.]/", "", $price_1);
+	$price_1 = str_replace(",",".",$price_1);
+	$price_tmp = substr($html, strpos($html, "Preis:") + strlen("Preis:"), 37);
+	$price_2 = substr($price_tmp, 18);
+	$price_2 = preg_replace("/[^0-9,.]/", "", $price_2);
+	$price_2 = str_replace(",",".",$price_2);
+	$price = doubleval($price_1) + doubleval($price_2); 
+	$price = "EUR ".$price;
+	}
+		else
+		{
+		$price = preg_replace("/[^0-9,.EUR ]/", "", $price);
+		}
+
+		
+		
 $priceurl = str_replace('/d','/ol',$url);
 $priceurl .= '?o=Used&op=1';
 
@@ -165,11 +198,13 @@ $imgurl = substr($img, strpos($img, "src=") + strlen("src="), 120);
 preg_match('~"(.*?)"~', $imgurl, $imgurl2);
 $finalimgurl = str_replace('"','', $imgurl2[0]);
 
-
 $arr = [
 0 => $name,
 1 => $offers,
 2 => $finalimgurl,
+3 => $price
+
+
 ];
 
 return $arr;
