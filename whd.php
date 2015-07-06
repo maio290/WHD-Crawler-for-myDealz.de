@@ -41,9 +41,13 @@ require_once("simple_html_dom.php");
 	echo "\n";
 	echo "\n";
 	
-		if(strpos($data_arr[3],"EUR" != false))
+	// Convert to number in order to compare it properly
+	$tmp = str_replace("EUR ","",$data_arr[3]);
+	$tmp = str_replace(",",".",$tmp);
+	$cmp = floatval($tmp);
+		if($cmp != 0)
 		{
-			echo $data_arr[3];
+			echo 'Neupreis auf Amazon.de: '.$cmp.' EUR';
 			echo "\n";
 		}
 			else
