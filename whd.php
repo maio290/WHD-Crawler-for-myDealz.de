@@ -149,6 +149,7 @@ $state_as_new = false;
 			$pricehtml = file_get_html($priceurl);
 			if($pricehtml == false)
 			{
+				$i = $i-1;
 				goto refetch_inner;
 			}
 			$pricehtml2 = $pricehtml ->find('a[href]');
