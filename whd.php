@@ -104,56 +104,89 @@ $price = substr($html, strpos($html, "Preis:") + strlen("Preis:"), 23);
 		$price = preg_replace("/[^0-9,.EUR ]/", "", $price);
 		}
 		
-		
+	
 $priceurl = str_replace('/d','/ol',$url);
 $priceurl .= '?o=Used&op=1';
 $pricehtml = file_get_html($priceurl);
 $pricehtml2 = $pricehtml ->find('a[href]');
+
+$qty = $pricehtml ->find('a[name="Used"]');
+$values = substr($qty[0], strpos($qty[0], "/") + strlen("/"), 23);
+
+
+$entries_per_page = 10;
+
+	if(intval($values) % 10  != 0)
+	{
+		$pages = intval((intval($values) / $entries_per_page )) + 1;
+	}
+	else
+	{
+		$pages = intval((intval($values) / $entries_per_page ));
+	}
+
+
 $offers = array();
 $state_acceptable = false;
 $state_good = false;
 $state_very_good = false;
 $state_as_new = false;
-foreach($pricehtml2 as &$value)
-{
-	if(strpos($value,'A8KICS1PHF7ZO') != false)
-	{
-		
-		
-		
-		if($state_acceptable == false && strpos($value,'Akzeptabel') != false)
+
+		for($i = 1; $i<=intval($pages); $i++)
 		{
-			$value = substr($value, (strpos($value, ">",1)+1), -1);
-			array_push($offers,$value);
-			$state_acceptable = true;
-			continue;
+			if($i == 1)
+			{$pricehtml2 = $pricehtml ->find('a[href]');}
+			else
+			{
+			$priceurl = str_replace('/d','/ol',$url);
+			$priceurl .= '?o=Used&op='.$i;
+			$pricehtml = file_get_html($priceurl);
+			$pricehtml2 = $pricehtml ->find('a[href]');
+			}
+				foreach($pricehtml2 as &$value)
+				{
+					if(strpos($value,'A8KICS1PHF7ZO') != false)
+					{
+						
+						if($state_acceptable == false && strpos($value,'Akzeptabel') != false)
+						{
+							$value = substr($value, (strpos($value, ">",1)+1), -1);
+							array_push($offers,$value);
+							$state_acceptable = true;
+							continue;
+						}
+						
+						if($state_good == false && strpos($value,'Gut') != false)
+						{
+							$value = substr($value, (strpos($value, ">",1)+1), -1);
+							array_push($offers,$value);
+							$state_good = true;
+							continue;
+						}
+						
+						if($state_very_good == false && strpos($value,'Sehr gut') != false)
+						{
+							$value = substr($value, (strpos($value, ">",1)+1), -1);
+							array_push($offers,$value);
+							$state_very_good = true;
+							continue;
+						}	
+						
+						if($state_as_new == false && strpos($value,'Wie neu') != false)
+						{
+							$value = substr($value, (strpos($value, ">",1)+1), -1);
+							array_push($offers,$value);
+							$state_as_new = true;
+							continue;
+						}		
+					}
+				}
+		
 		}
+	
 		
-		if($state_good == false && strpos($value,'Gut') != false)
-		{
-			$value = substr($value, (strpos($value, ">",1)+1), -1);
-			array_push($offers,$value);
-			$state_good = true;
-			continue;
-		}
-		
-		if($state_very_good == false && strpos($value,'Sehr gut') != false)
-		{
-			$value = substr($value, (strpos($value, ">",1)+1), -1);
-			array_push($offers,$value);
-			$state_very_good = true;
-			continue;
-		}	
-		
-		if($state_as_new == false && strpos($value,'Wie neu') != false)
-		{
-			$value = substr($value, (strpos($value, ">",1)+1), -1);
-			array_push($offers,$value);
-			$state_as_new = true;
-			continue;
-		}		
-	}
-}
+	
+
 // IMG:  http://www.amazon.de/gp/aw/d/B00OBIXRSY/ref=mw_dp_img_2_z?in=2&is=m&qid=1436192036&sr=8-1 
 // Imagesize: m: 160x160 px, s: 110x110 px, l: 500x500 px.
 $imagesize = "m";
