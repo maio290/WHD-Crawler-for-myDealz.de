@@ -107,7 +107,12 @@ $price = substr($html, strpos($html, "Preis:") + strlen("Preis:"), 23);
 	
 $priceurl = str_replace('/d','/ol',$url);
 $priceurl .= '?o=Used&op=1';
+refetch_outer:
 $pricehtml = file_get_html($priceurl);
+		if($pricehtml == false)
+		{
+				goto refetch_outer;
+		}
 $pricehtml2 = $pricehtml ->find('a[href]');
 
 $qty = $pricehtml ->find('a[name="Used"]');
@@ -138,9 +143,14 @@ $state_as_new = false;
 			{$pricehtml2 = $pricehtml ->find('a[href]');}
 			else
 			{
+			refetch_inner:
 			$priceurl = str_replace('/d','/ol',$url);
 			$priceurl .= '?o=Used&op='.$i;
 			$pricehtml = file_get_html($priceurl);
+			if($pricehtml == false)
+			{
+				goto refetch_inner;
+			}
 			$pricehtml2 = $pricehtml ->find('a[href]');
 			}
 				foreach($pricehtml2 as &$value)
