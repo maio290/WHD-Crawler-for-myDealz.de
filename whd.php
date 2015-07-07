@@ -1,7 +1,7 @@
 <?php
 /*
 The MIT License (MIT)
-Copyright (c) 2015 Mario-Luca Hoffmann for files: whd.php & whd_form.html
+Copyright (c) 2015 Mario-Luca Hoffmann for files: whd.php, whd_form.html & idealo.php
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -19,13 +19,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 require_once("simple_html_dom.php");
+require_once("idealo.php");
 	if($_POST)
 	{
 	$asin = get_asin($_POST['url']);
 	$urlm = prepare_url_mobile($asin);
 	$urld = prepare_url_desktop($asin);
 	$data_arr = get_data($urlm);
-	echo '<textarea cols="50" rows="10" >';
+	echo '<textarea rows="20" cols="50">';
 	echo '[url='.$urld.']';
 	echo '[img]'.$data_arr[2].'[/img]';
 	echo "\n";
@@ -34,6 +35,7 @@ require_once("simple_html_dom.php");
 	echo "\n";
 	
 	// Convert to number in order to compare it properly
+	// 4 = names, 5 = prices (idealo)
 	$tmp = str_replace("EUR ","",$data_arr[3]);
 	$tmp = str_replace(",",".",$tmp);
 	$cmp = floatval($tmp);
@@ -46,6 +48,21 @@ require_once("simple_html_dom.php");
 			{
 				echo 'Kein Neupreis auf Amazon.de vorhanden!';
 				echo "\n";
+			}
+			
+			if(count($data_arr[4]) == 1)
+			{
+				$name_idealo_arr  = $data_arr[4];
+				$name_idealo = $name_idealo_arr[0];
+				$price_idealo_arr = $data_arr[5];
+				$price_idealo = strip_tags($price_idealo_arr[0]);
+				$price_idealo = substr($price_idealo,0,strpos($price_idealo, "-"));
+				$price_idealo = str_replace("€","EUR",$price_idealo);
+				$name_idealo = substr($name_idealo, (strpos($name_idealo, ">",1)+1), -1);
+				$name_idealo = strip_tags($name_idealo);
+				$name_idealo = str_replace(20,"",$name_idealo);
+				$name_idealo = preg_replace('/[^a-zA-Z0-9_ %\[\]\.\(\)%&-]/s', '', $name_idealo);
+				echo ("Idealo (".$name_idealo."): " . $price_idealo);
 				echo "\n";
 			}
 		foreach($data_arr[1] as &$value)
@@ -60,6 +77,35 @@ require_once("simple_html_dom.php");
 		
 	echo '[/url]';
 	echo '</textarea>';
+	
+		if(count($data_arr[4]) > 1)
+		{
+			$name_idealo_arr  = $data_arr[4];
+			$price_idealo_arr = $data_arr[5];
+			echo '<br>';
+			echo '<br>';
+			echo '<br>';
+			echo '<br>';
+			echo '<textarea rows="20" cols="50">';
+		
+				for($i = 0; $i<count($data_arr[4]); $i++)
+				{
+				$name_idealo = $name_idealo_arr[$i];
+				$price_idealo = strip_tags($price_idealo_arr[$i]);
+				$price_idealo = substr($price_idealo,0,strpos($price_idealo, "-"));
+				$price_idealo = str_replace("€","EUR",$price_idealo);
+				$name_idealo = substr($name_idealo, (strpos($name_idealo, ">",1)+1), -1);
+				$name_idealo = strip_tags($name_idealo);
+				$name_idealo = str_replace(20,"",$name_idealo);
+				$name_idealo = preg_replace('/[^a-zA-Z0-9_ ßäöü%\[\]\.\(\)%&-]/s', '', $name_idealo);
+				echo ("Idealo (".$name_idealo."): " . $price_idealo);
+				echo "\n";
+				}
+			
+		echo '</textarea>';
+	
+	
+	}
 	}
 function prepare_url_mobile($item_id)
 {
@@ -220,11 +266,18 @@ $img = $imgsrc[0];
 $imgurl = substr($img, strpos($img, "src=") + strlen("src="), 120);
 preg_match('~"(.*?)"~', $imgurl, $imgurl2);
 $finalimgurl = str_replace('"','', $imgurl2[0]);
+
+
+$pvl = get_idealo($name);
+
+
 $arr = [
 0 => $name,
 1 => $offers,
 2 => $finalimgurl,
-3 => $price
+3 => $price,
+4 => $pvl[0],
+5 => $pvl[1],
 ];
 return $arr;
 }
