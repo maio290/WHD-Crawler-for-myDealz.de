@@ -69,7 +69,7 @@ require_once("idealo.php");
 				$name_idealo = substr($name_idealo, (strpos($name_idealo, ">",1)+1), -1);
 				$name_idealo = strip_tags($name_idealo);
 				$name_idealo = str_replace(20,"",$name_idealo);
-				$name_idealo = preg_replace('/[^a-zA-Z0-9_ äöüß%\[\]\.\(\)%&-]/s', '', $name_idealo);
+				$name_idealo = preg_replace('/[^a-zA-Z0-9_ äöüß %\[\]\.\(\)%&-]/s', '', $name_idealo);
 				echo ("Idealo (".$name_idealo."): " . $price_idealo);
 				echo "\n";
 			}
