@@ -39,8 +39,7 @@ require_once("idealo.php");
 	echo '[img]'.$data_arr[2].'[/img]';
 	echo "\n";
 	echo $data_arr[0];
-	echo "\n
-	      \n";
+	echo "\n\n";
 	
 	// Convert to number in order to compare it properly
 	// 4 = names, 5 = prices (idealo)
@@ -105,7 +104,7 @@ require_once("idealo.php");
 				$name_idealo = substr($name_idealo, (strpos($name_idealo, ">",1)+1), -1);
 				$name_idealo = strip_tags($name_idealo);
 				$name_idealo = str_replace(20,"",$name_idealo);
-				$name_idealo = preg_replace('/[^a-zA-Z0-9_äöüß%\[\]\.\(\)%&-]/s', '', $name_idealo);
+				$name_idealo = preg_replace('/[^a-zA-Z0-9 _äöüß%\[\]\.\(\)%&-]/s', '', $name_idealo);
 				echo ("Idealo (".$name_idealo."): " . $price_idealo);
 				echo "\n";
 				}
@@ -131,6 +130,10 @@ if(strpos($url,"/dp/") != false)
 {return substr($url, strpos($url, 'dp/') + strlen('dp/'), 10);}
 if(strpos($url,"/gp/product/") != false)
 {return substr($url, strpos($url, 'product/') + strlen('product/'), 10);}
+if(strpos($url,"/gp/aw/d/") != false)
+{return substr($url, strpos($url, '/aw/d/') + strlen('/aw/d/'), 10);}
+if(strpos($url,"/gp/offer-listing/") != false)
+{return substr($url, strpos($url, '/offer-listing/') + strlen('/offer-listing/'), 10);}
 }
 function get_data($url) {
 // Use with mobile links only
