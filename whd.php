@@ -26,20 +26,13 @@ require_once("idealo.php");
 	$urlm = prepare_url_mobile($asin);
 	$urld = prepare_url_desktop($asin);
 	$data_arr = get_data($urlm);
-	echo '<!DOCTYPE html>
-		<html lang="de">
-		<head>
-		<meta charset="utf-8">
-		<title> mydealz.de - WHD Crawler</title>
-		</head>
-		<body>
-		  ';
 	echo '<textarea rows="20" cols="50">';
 	echo '[url='.$urld.']';
 	echo '[img]'.$data_arr[2].'[/img]';
 	echo "\n";
 	echo $data_arr[0];
-	echo "\n\n";
+	echo "\n";
+	echo "\n";
 	
 	// Convert to number in order to compare it properly
 	// 4 = names, 5 = prices (idealo)
@@ -68,7 +61,7 @@ require_once("idealo.php");
 				$name_idealo = substr($name_idealo, (strpos($name_idealo, ">",1)+1), -1);
 				$name_idealo = strip_tags($name_idealo);
 				$name_idealo = str_replace(20,"",$name_idealo);
-				$name_idealo = preg_replace('/[^a-zA-Z0-9_ äöüß %\[\]\.\(\)%&-]/s', '', $name_idealo);
+				$name_idealo = preg_replace('/[^a-zA-Z0-9_ %\[\]\.\(\)%&-]/s', '', $name_idealo);
 				echo ("Idealo (".$name_idealo."): " . $price_idealo);
 				echo "\n";
 			}
@@ -104,7 +97,7 @@ require_once("idealo.php");
 				$name_idealo = substr($name_idealo, (strpos($name_idealo, ">",1)+1), -1);
 				$name_idealo = strip_tags($name_idealo);
 				$name_idealo = str_replace(20,"",$name_idealo);
-				$name_idealo = preg_replace('/[^a-zA-Z0-9 _äöüß%\[\]\.\(\)%&-]/s', '', $name_idealo);
+				$name_idealo = preg_replace('/[^a-zA-Z0-9_ ßäöü%\[\]\.\(\)%&-]/s', '', $name_idealo);
 				echo ("Idealo (".$name_idealo."): " . $price_idealo);
 				echo "\n";
 				}
@@ -113,8 +106,6 @@ require_once("idealo.php");
 	
 	
 	}
-		echo '</body>
-		</html>';
 	}
 function prepare_url_mobile($item_id)
 {
@@ -124,24 +115,27 @@ function prepare_url_desktop($item_id)
 {
 return 'http://www.amazon.de/dp/'.$item_id.'/?me=A8KICS1PHF7ZO';
 }
+
 function get_asin($url)
 {
-if(strpos($url,"/dp/") != false)
-{return substr($url, strpos($url, 'dp/') + strlen('dp/'), 10);}
-if(strpos($url,"/gp/product/") != false)
-{return substr($url, strpos($url, 'product/') + strlen('product/'), 10);}
-if(strpos($url,"/gp/aw/d/") != false)
-{return substr($url, strpos($url, '/aw/d/') + strlen('/aw/d/'), 10);}
-if(strpos($url,"/gp/offer-listing/") != false)
-{return substr($url, strpos($url, '/offer-listing/') + strlen('/offer-listing/'), 10);}
+	$possASINprefixes = ["dp/", "gp/product/", "gp/aw/d/", "gp/offer-listing/"];
+	foreach ($possASINprefixes as $prefix) 
+	{
+		if(strpos($url, "/" . $prefix) != false)
+		{
+			return substr($url, strpos($url, $prefix) + strlen($prefix), 10);
+		}
+	}
 }
+
+
+
 function get_data($url) {
 // Use with mobile links only
 get_data:
-$html = file_get_html($url);
-$name = $html ->find('b[id="product-title"]');
-$name = $name[0];
-$name = strip_tags($name);
+$html = file_get_html($url)->plaintext;
+$name =  substr($html, 0, strpos($html, "Amazon.de")-1);
+$name = trim($name," ");
 // Priceurl: http://www.amazon.de/gp/aw/ol/B00OBIXRSY?o=Used&op=1
 // Common Url: http://www.amazon.de/gp/aw/d/B00OBIXRSY 
 // MerchantID: A8KICS1PHF7ZO
@@ -171,7 +165,7 @@ refetch_outer:
 $pricehtml = file_get_html($priceurl);
 		if($pricehtml == false)
 		{
-				//goto refetch_outer;
+				goto refetch_outer;
 		}
 $pricehtml2 = $pricehtml ->find('a[href]');
 
@@ -283,7 +277,7 @@ $finalimgurl = str_replace('"','', $imgurl2[0]);
 
 
 $pvl = get_idealo($name);
-$name = utf8_encode($name);
+
 
 $arr = [
 0 => $name,
