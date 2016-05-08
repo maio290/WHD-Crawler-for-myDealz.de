@@ -126,15 +126,14 @@ return 'http://www.amazon.de/dp/'.$item_id.'/?me=A8KICS1PHF7ZO';
 }
 function get_asin($url)
 {
-if(strpos($url,"/dp/") != false)
-{return substr($url, strpos($url, 'dp/') + strlen('dp/'), 10);}
-if(strpos($url,"/gp/product/") != false)
-{return substr($url, strpos($url, 'product/') + strlen('product/'), 10);}
-if(strpos($url,"/gp/aw/d/") != false)
-{return substr($url, strpos($url, '/aw/d/') + strlen('/aw/d/'), 10);}
-if(strpos($url,"/gp/offer-listing/") != false)
-{return substr($url, strpos($url, '/offer-listing/') + strlen('/offer-listing/'), 10);}
-}
+	$possASINprefixes = ["dp/", "gp/product/", "gp/aw/d/"];
+	foreach ($possASINprefixes as $prefix) 
+	{
+		if(strpos($url, "/" . $prefix) != false)
+		{
+			return substr($url, strpos($url, $prefix) + strlen($prefix), 10);
+		}
+	}
 function get_data($url) {
 // Use with mobile links only
 get_data:
